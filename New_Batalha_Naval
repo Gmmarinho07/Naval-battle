@@ -11,11 +11,17 @@ class BatalhaNaval:
         self.root.title("Batalha Naval")
         self.root.resizable(False, False)
 
-        # Carregar imagens (sprites)
-        self.img_agua = tk.PhotoImage(file="agua.png")
-        self.img_navio = tk.PhotoImage(file="navio.png")
-        self.img_acerto = tk.PhotoImage(file="acerto.png")
-        self.img_area_atacada = tk.PhotoImage(file="area_atacada.png")
+        # Tenta carregar imagens; se falhar, usa texto como fallback
+        try:
+            self.img_agua = tk.PhotoImage(file="agua.png")
+            self.img_navio = tk.PhotoImage(file="navio.png")
+            self.img_acerto = tk.PhotoImage(file="acerto.png")
+            self.img_area_atacada = tk.PhotoImage(file="area_atacada.png")
+        except tk.TclError:
+            self.img_agua = None
+            self.img_navio = None
+            self.img_acerto = None
+            self.img_area_atacada = None
 
         # Tela inicial com regras
         self.tela_inicial()
@@ -41,26 +47,20 @@ class BatalhaNaval:
         botao_iniciar.pack(pady=20)
 
     def iniciar_jogo(self):
-        self.frame_inicial.destroy()  # Remove a tela inicial
+        self.frame_inicial.destroy()
 
-        # Inicializa o tabuleiro
+        # Inicializa o tabuleiro e configurações do jogo
         self.tabuleiro_oponente = [["~" for _ in range(TAMANHO_TABULEIRO)] for _ in range(TAMANHO_TABULEIRO)]
         self.atacado = [[False for _ in range(TAMANHO_TABULEIRO)] for _ in range(TAMANHO_TABULEIRO)]
-
-        # Posiciona os navios do oponente
         self.navios_oponente = set()
         while len(self.navios_oponente) < NUM_NAVIOS:
             linha = random.randint(0, TAMANHO_TABULEIRO - 1)
             coluna = random.randint(0, TAMANHO_TABULEIRO - 1)
             self.navios_oponente.add((linha, coluna))
-
-        # Determina o número de disparos baseado no lançamento de dois dados
         self.disparos = random.randint(1, 6) + random.randint(1, 6)
-
-        # Contadores
         self.acertos = 0
 
-        # Exibe os contadores
+        # Interface do jogo
         self.label_contadores = tk.Label(
             self.root,
             text=f"Disparos restantes: {self.disparos} | Acertos: {self.acertos}",
@@ -68,20 +68,19 @@ class BatalhaNaval:
         )
         self.label_contadores.grid(row=0, column=0, columnspan=TAMANHO_TABULEIRO, pady=(10, 5))
 
-        # Cria botões para o tabuleiro
         self.botoes = []
         for i in range(TAMANHO_TABULEIRO):
             linha_botoes = []
             for j in range(TAMANHO_TABULEIRO):
+                img = self.img_agua if self.img_agua else None
                 btn = tk.Button(
-                    self.root, image=self.img_agua, width=64, height=64,
-                    command=lambda i=i, j=j: self.atacar(i, j)
+                    self.root, image=img, text="~", width=8, height=4,
+                    compound="center", command=lambda i=i, j=j: self.atacar(i, j)
                 )
                 btn.grid(row=i + 1, column=j, padx=2, pady=2)
                 linha_botoes.append(btn)
             self.botoes.append(linha_botoes)
 
-        # Mensagem de feedback
         self.label_mensagem = tk.Label(self.root, text="", font=("Helvetica", 12))
         self.label_mensagem.grid(row=TAMANHO_TABULEIRO + 1, column=0, columnspan=TAMANHO_TABULEIRO, pady=10)
 
@@ -93,13 +92,13 @@ class BatalhaNaval:
         self.atacado[i][j] = True
 
         if (i, j) in self.navios_oponente:
-            self.botoes[i][j].config(image=self.img_acerto)
+            self.botoes[i][j].config(image=self.img_acerto if self.img_acerto else None, text="X")
             self.acertos += 1
             self.exibir_mensagem("Navio inimigo atingido!")
             if self.acertos == NUM_NAVIOS:
                 self.mensagem_vitoria()
         else:
-            self.botoes[i][j].config(image=self.img_area_atacada)
+            self.botoes[i][j].config(image=self.img_area_atacada if self.img_area_atacada else None, text="O")
             self.disparos -= 1
             self.exibir_mensagem("Tiro na água!")
             if self.disparos == 0:
@@ -124,25 +123,28 @@ class BatalhaNaval:
 
     def revelar_navios(self):
         for x, y in self.navios_oponente:
-            if self.botoes[x][y]["image"] == str(self.img_agua):
-                self.botoes[x][y].config(image=self.img_navio)
+            if not self.atacado[x][y]:
+                self.botoes[x][y].config(image=self.img_navio if self.img_navio else None, text="N")
 
     def tela_fim_jogo(self, mensagem):
-        self.frame_fim = tk.Frame(self.root)
-        self.frame_fim.grid(row=0, column=0, columnspan=TAMANHO_TABULEIRO, pady=10)
+        for widget in self.root.winfo_children():
+            widget.destroy()
 
-        label_fim = tk.Label(self.frame_fim, text=mensagem, font=("Helvetica", 16, "bold"))
+        frame_fim = tk.Frame(self.root)
+        frame_fim.pack(pady=20)
+
+        label_fim = tk.Label(frame_fim, text=mensagem, font=("Helvetica", 16, "bold"))
         label_fim.pack(pady=10)
 
-        botao_reiniciar = tk.Button(self.frame_fim, text="Reiniciar", font=("Helvetica", 12, "bold"),
+        botao_reiniciar = tk.Button(frame_fim, text="Reiniciar", font=("Helvetica", 12, "bold"),
                                     command=self.reiniciar_jogo)
         botao_reiniciar.pack(pady=10)
 
     def reiniciar_jogo(self):
-        self.frame_fim.destroy()
         for widget in self.root.winfo_children():
             widget.destroy()
         self.__init__(self.root)
+
 
 # Configuração da interface
 root = tk.Tk()

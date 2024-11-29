@@ -109,7 +109,7 @@ class BatalhaNaval:
 
 # Configuração da interface
 root = tk.Tk()
-app = BatalhaNaval(root)
+app = BatalhaNaval()
 root.mainloop()
 import tkinter as tk
 import random
@@ -222,5 +222,5 @@ class BatalhaNaval:
 
 # Configuração da interface
 root = tk.Tk()
-app = BatalhaNaval(root)
+app = BatalhaNaval()
 root.mainloop()
