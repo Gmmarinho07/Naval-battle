@@ -7,7 +7,7 @@ def main():
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("Batalh Naval")
 
-    clock = pygame.time.CLock() # Controla a taxa de quadros por segundo
+    clock = pygame.time.Clock() # Controla a taxa de quadros por segundo
     game = Game(screen)
 
     running = True
