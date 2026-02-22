@@ -5,7 +5,7 @@ BOARD_SIZE = 5
 NUM_SHIPS = 5 #Númmero de navios por jogador
 
 CELL_SIZE = 90 #Tamanho de cada célula do tabuleiro em pixels
-BOARDOFFSET_X = 100 #Deslocamento do tabuleiro no eixo X
+BOARD_OFFSET_X = 100 #Deslocamento do tabuleiro no eixo X
 BOARD_OFFSET_Y = 150 #Deslocamento do tabuleiro no eixo Y
 
 BACKGROUND_COLOR = (15, 30, 60) #Cor de fundo do jogo
