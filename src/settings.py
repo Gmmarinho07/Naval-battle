@@ -10,3 +10,7 @@ BOARD_OFFSET_Y = 150 #Deslocamento do tabuleiro no eixo Y
 
 BACKGROUND_COLOR = (15, 30, 60) #Cor de fundo do jogo
 TEXT_COLOR = (240, 240, 240) #Cor do texto exibido no jogo
+STATE_MENU = "menu"
+STATE_PLAYING = "playing"
+STATE_GAME_OVER = "game_over"
+
