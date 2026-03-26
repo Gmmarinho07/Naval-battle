@@ -23,13 +23,9 @@ class Game:
 
 
     def handle_event(self, event):
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if self.state == STATE_MENU:
+        if self.state == STATE_MENU:
+            if hasattr(self, "play_button") and self.play_button.collidepoint(event.pos):
                 self.start_game()
-            elif self.state == STATE_PLAYING:
-                self.handle_click(event.pos)
-            elif self.state == STATE_GAME_OVER:
-                self.state = STATE_MENU
 
 
 
@@ -107,11 +103,28 @@ class Game:
     #-----TELAS--------
 
     def draw_menu(self):
-        title = self.title_font.render ("Batalha Naval", True, TEXT_COLOR)
-        text = self.text_font.render ("Clique para começar", True, TEXT_COLOR)
+        title = self.title_font.render("Batalha Naval", True, TEXT_COLOR)
 
-        self.screen.blit(title, (WIDTH// 2 - title.get_width() // 2, 200)) # Centralizando o título
-        self.screen.blit(text, (WIDTH//2 - text.get_width() // 2, 300)) # Centralizando o texto
+        # Hora dos botões
+        button_rect = pygame.Rect(WIDTH//2 - 100, 300, 200, 60)
+
+        mx, my = pygame.mouse.get_pos()
+        hovered = button_rect.collidepoint(mw, my)
+
+        color = (100, 200, 100) if hovered else (70, 150, 70)
+
+        pygame.draw.rect(self.screen, color, button_rect, border_radius =10)
+
+        text = self.text_font.render("Jogar", True, (0,0,0))
+
+        self.screen.blit(title, (WIDTH//2 - title.get_width() //2, 200))
+        self.screen.blit(text, (
+            button_rect.x + button_rect.width//2 - text.get_width()//2,
+            button_rect.y + button_rect.height//2 - text.get_height() //2
+
+        ))
+        self.play_button = button_rect
+
 
     def draw_game_over(self):
         over = self.title_font.render(self.message, True, TEXT_COLOR)
@@ -120,22 +133,27 @@ class Game:
         self.screen.blit(restart, (WIDTH//2 - restart.get_width() // 2, 330))
 
     def draw_board(self):
+        mx, my = pygame.mouse.get_pos()
         for row in range(BOARD_SIZE):
             for col in range(BOARD_SIZE):
                 x = BOARD_OFFSET_X + col * CELL_SIZE
                 y = BOARD_OFFSET_Y + row * CELL_SIZE
                 rect = pygame.Rect(x, y, CELL_SIZE, CELL_SIZE)
-                
 
+                hovered = rect.collidepoint(mx, my) # Verifica se o mouse está sobre a célula
                 if not self.board.attacked[row][col]:
-                    color = (70, 130, 180) # Azul para células não atacadas
-                elif(row, col) in self.board.ships:
+                    color = (70, 130, 180)
+                elif (row, col) in self.board.ships:
                     color = (200, 50, 50)
                 else:
-                    color = (220, 220, 220) # Ciano para água
+                    color = (100, 220, 220)
 
-                    pygame.draw.rect(self.screen, color, rect)
-                    pygame.draw.rect(self.screen, (0,0,0), rect, 2)
+                # Efeito hover
+                if hovered and not self.board.attacked[row][col]:
+                    color = (100, 170, 220)
+
+                pygame.draw.rect(self.screen, color, rect)
+                pygame.draw.rect(self.screen, (0,0,0), rect, 2)
 
     def draw_hud(self):
         shots_text = self.text_font.render(f"Disparos restantes: {self.shots}", True, TEXT_COLOR)
